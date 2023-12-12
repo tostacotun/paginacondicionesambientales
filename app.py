@@ -1,7 +1,5 @@
 import streamlit as st
-import requests as rq
 import pandas as pd
-from io import StringIO
 from datetime import datetime, timedelta
 import plotly.express as px
 from pymongo import MongoClient
@@ -10,13 +8,13 @@ import os
 # Variables
 load_dotenv()
 
-DATABASE_URL= os.getenv("DATABASE_URL")
-DATABASE_USER= os.getenv("DATABASE_USER")
-DATABASE_PASS= os.getenv("DATABASE_PASS")
-DATABASE_AUTHSRC= os.getenv("DATABASE_AUTHSRC")
+DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_USER = os.getenv("DATABASE_USER")
+DATABASE_PASS = os.getenv("DATABASE_PASS")
+DATABASE_AUTHSRC = os.getenv("DATABASE_AUTHSRC")
 DATABASE_DB = os.getenv("DATABASE_DB")
 DATABASE_COLLECTION = os.getenv("DATABASE_COLLECTION")
-#MONGO
+# MONGO
 cliente = MongoClient(DATABASE_URL,
                       username=DATABASE_USER,
                       password=DATABASE_PASS,
@@ -35,20 +33,23 @@ st.set_page_config(
 # header
 st.header("Este es el cuarto de max")
 
+
 # cosnulta de datos
 @st.cache_data(ttl=450)
 def carga_datos():
     fecha = datetime.now() - timedelta(days=365)
     consulta = {"fecha": {"$gte": fecha}}
-    mydoc = colleccion.find(filter= consulta,projection={"_id":0})
+    mydoc = colleccion.find(filter=consulta, projection={"_id": 0})
     datos = pd.DataFrame(list(mydoc))
-    datos["fecha"] = pd.to_datetime(datos["fecha"].dt.tz_localize("UTC")).dt.tz_convert('America/Bogota')
+    datos["fecha"] = pd.to_datetime(
+            datos["fecha"].
+            dt.tz_localize("UTC")).dt.tz_convert('America/Bogota')
     datos["dia"] = datos["fecha"].map(lambda x: x.dayofweek)
     datos["mes"] = datos["fecha"].map(lambda x: x.month)
     datos["hora"] = datos["fecha"].map(lambda x: x.hour)
     datos["diaano"] = datos["fecha"].map(lambda x: x.day_of_year)
     datos["diasemana"] = datos["fecha"].map(lambda x: x.dayofweek)
-    return  datos
+    return datos
 #cuerpo
 
 descargados = carga_datos()
